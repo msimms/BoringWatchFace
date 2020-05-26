@@ -78,7 +78,15 @@ class BoringWatchFaceView extends WatchUi.WatchFace {
 
 		// Update the message count.
     	var notificationAmount = System.getDeviceSettings().notificationCount;
-		var formattedNotificationAmount = notificationAmount.format("%d");
+		var formattedNotificationAmount = "";
+		if (notificationAmount > 0) {
+			formattedNotificationAmount = notificationAmount.format("%d");
+			if (notificationAmount == 1) {
+				formattedNotificationAmount = formattedNotificationAmount + " Msg";
+			} else {
+				formattedNotificationAmount = formattedNotificationAmount + " Msgs";
+			}
+		}
 		var notificationCountDisplay = View.findDrawableById("MessageCount");      
         notificationCountDisplay.setColor(foregroundColor);
 		notificationCountDisplay.setText(formattedNotificationAmount);
