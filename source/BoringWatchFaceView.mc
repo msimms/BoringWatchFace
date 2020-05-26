@@ -25,6 +25,8 @@ using Toybox.Graphics;
 using Toybox.System;
 using Toybox.Lang;
 using Toybox.Application;
+using Toybox.Time;
+using Toybox.Time.Gregorian;
 
 class BoringWatchFaceView extends WatchUi.WatchFace {
 
@@ -45,10 +47,9 @@ class BoringWatchFaceView extends WatchUi.WatchFace {
 
     // Update the view
     function onUpdate(dc) {
-        // Get the current time and format it correctly
+        // Get the current time and format the date and time correctly.
         var timeFormat = "$1$:$2$";
-        var clockTime = System.getClockTime();
-        var hours = clockTime.hour;
+        var today = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
         if (!System.getDeviceSettings().is24Hour) {
             if (hours > 12) {
                 hours = hours - 12;
@@ -59,20 +60,35 @@ class BoringWatchFaceView extends WatchUi.WatchFace {
                 hours = hours.format("%02d");
             }
         }
-        var timeString = Lang.format(timeFormat, [hours, clockTime.min.format("%02d")]);
+        var timeString = Lang.format(timeFormat, [ today.hour, today.min.format("%02d")]);
+        var dateString = Lang.format("$1$ $2$ $3$", [ today.day_of_week, today.day, today.month ] );
 
-        // Update the view
-        var view = View.findDrawableById("TimeLabel");
-        view.setColor(Application.getApp().getProperty("ForegroundColor"));
-        view.setText(timeString);
+		// Foreground color.
+		var foregroundColor = Application.getApp().getProperty("ForegroundColor");
 
-        // Call the parent onUpdate function to redraw the layout
+        // Update the time.
+        var timeView = View.findDrawableById("TimeLabel");
+        timeView.setColor(foregroundColor);
+        timeView.setText(timeString);
+
+		// Update the date.
+        var dateView = View.findDrawableById("DateLabel");
+        dateView.setColor(foregroundColor);
+        dateView.setText(dateString);
+
+		// Update the message count.
+    	var notificationAmount = System.getDeviceSettings().notificationCount;
+		var formattedNotificationAmount = notificationAmount.format("%d");
+		var notificationCountDisplay = View.findDrawableById("MessageCount");      
+        notificationCountDisplay.setColor(foregroundColor);
+		notificationCountDisplay.setText(formattedNotificationAmount);
+
+        // Call the parent onUpdate function to redraw the layout.
         View.onUpdate(dc);
     }
 
-    // Called when this View is removed from the screen. Save the
-    // state of this View here. This includes freeing resources from
-    // memory.
+    // Called when this View is removed from the screen. Save the state
+    // of this View here. This includes freeing resources from memory.
     function onHide() {
     }
 
